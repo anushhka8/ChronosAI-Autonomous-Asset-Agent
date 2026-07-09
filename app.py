@@ -16,7 +16,7 @@ import threading
 from collections import deque
 
 # ── Third-party ───────────────────────────────────────────────────────────────
-from flask import Flask, jsonify, render_template, Response, stream_with_context
+from flask import Flask, jsonify, render_template, Response, stream_with_context, send_file
 from flask_cors import CORS
 from dotenv import load_dotenv
 
@@ -539,6 +539,26 @@ def stop_agent():
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+# ── DYNAMIC AUTOMATIC STATIC FILE ASSET ROUTING PATH FIXERS ───────────────────
+@app.route('/script.js')
+def serve_js():
+    for location in ['static', '', 'templates', 'static/js']:
+        file_path = os.path.join(app.root_path, location, 'script.js')
+        if os.path.exists(file_path):
+            return send_file(file_path, mimetype='application/javascript')
+    return "File not found", 404
+
+
+@app.route('/style.css')
+def serve_css():
+    for location in ['static', '', 'templates', 'static/css']:
+        file_path = os.path.join(app.root_path, location, 'style.css')
+        if os.path.exists(file_path):
+            return send_file(file_path, mimetype='text/css')
+    return "File not found", 404
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 @app.route("/api/status")
