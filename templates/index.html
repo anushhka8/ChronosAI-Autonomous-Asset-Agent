@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ChronosAI — Autonomous Asset Reliability Agent</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+
+  <!-- Local stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css"/>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','system-ui','sans-serif'], mono: ['JetBrains Mono','monospace'] },
+          colors: {
+            'cyber-blue'  : '#00d4ff',
+            'cyber-purple': '#8b5cf6',
+            'cyber-green' : '#00ff88',
+            'cyber-red'   : '#ff3366',
+            'cyber-yellow': '#ffd700',
+            'dark-bg'     : '#020817',
+            'dark-surface': '#0d1526',
+            'dark-card'   : '#0f1f38',
+            'dark-border' : '#1e3a5f',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="dark bg-dark-bg text-white min-h-screen font-sans">
+
+<!-- ═══════════════════════════════════════════════════════════ HEADER -->
+<header class="sticky top-0 z-50 border-b border-dark-border bg-dark-bg/95 backdrop-blur-sm">
+  <div class="max-w-screen-2xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+
+    <!-- Logo -->
+    <div class="flex items-center gap-3">
+      <div class="logo-orb w-10 h-10 rounded-full flex items-center justify-center text-lg font-black">⚡</div>
+      <div>
+        <h1 class="text-xl font-black tracking-tight text-white">
+          Chronos<span class="text-cyber-blue">AI</span>
+        </h1>
+        <p class="text-xs text-gray-400 leading-none font-mono">Autonomous Asset Reliability Agent</p>
+      </div>
+    </div>
+
+    <!-- ── Tab Navigation ── -->
+    <nav class="flex items-center gap-1 bg-dark-card border border-dark-border rounded-xl p-1">
+      <button id="tabDashboard" onclick="switchTab('dashboard')"
+        class="nav-tab nav-tab-active px-4 py-1.5 rounded-lg text-xs font-bold tracking-wider uppercase">
+        ◎ Dashboard
+      </button>
+      <button id="tabChat" onclick="switchTab('chat')"
+        class="nav-tab px-4 py-1.5 rounded-lg text-xs font-bold tracking-wider uppercase">
+        ◈ Chat
+      </button>
+    </nav>
+
+    <!-- Status pills -->
+    <div class="flex items-center gap-3 flex-wrap justify-end">
+      <div class="status-pill flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold">
+        <span id="agentStatusDot" class="w-2 h-2 rounded-full bg-gray-500 pulse-dot"></span>
+        <span id="agentStatusText" class="font-mono uppercase tracking-widest">INIT</span>
+      </div>
+      <div class="status-pill flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono">
+        <span class="text-cyber-blue">⊞</span>
+        <span id="headerModel" class="text-gray-300 truncate max-w-[140px]">—</span>
+      </div>
+      <div id="watsonxBadge" class="hidden px-3 py-1.5 rounded-full text-xs font-bold bg-cyber-blue/10 text-cyber-blue border border-cyber-blue/30">
+        WATSONX LIVE
+      </div>
+      <div id="simBadge" class="px-3 py-1.5 rounded-full text-xs font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">
+        SIMULATION
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex items-center gap-2">
+      <button id="btnStart" onclick="agentControl('start')"
+        class="btn-glow-blue px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase">
+        ▶ START
+      </button>
+      <button id="btnStop" onclick="agentControl('stop')"
+        class="btn-glow-red px-4 py-2 rounded-lg text-xs font-bold tracking-wider uppercase opacity-50">
+        ■ STOP
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════ DASHBOARD TAB CONTENT -->
+<div id="dashboardPanel">
+
+<!-- ═══════════════════════════════════════════════════════════ HERO BANNER -->
+<section class="relative overflow-hidden border-b border-dark-border">
+  <div class="scan-line-bg absolute inset-0 pointer-events-none"></div>
+  <div class="max-w-screen-2xl mx-auto px-4 py-8 relative z-10">
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between">
+      <div>
+        <p class="text-xs font-mono text-cyber-blue uppercase tracking-widest mb-1">IBM Watsonx.ai · Granite · ReAct Loop</p>
+        <h2 class="text-3xl md:text-4xl font-black text-white leading-tight">
+          Industrial Telemetry <br class="hidden md:block"/>
+          <span class="text-gradient">Command Centre</span>
+        </h2>
+        <p class="text-gray-400 mt-2 text-sm max-w-lg">
+          Continuous autonomous reasoning over multi-modal sensor streams and technician shift logs.
+          Real-time threshold detection · NLP risk extraction · Prescriptive ROI optimisation.
+        </p>
+      </div>
+      <!-- ROI Hero Metric -->
+      <div class="roi-card rounded-2xl p-5 text-center min-w-[200px]">
+        <p class="text-xs font-mono text-gray-400 uppercase tracking-widest mb-1">Enterprise Savings</p>
+        <div id="roiHero" class="text-4xl font-black text-cyber-green roi-number">$0</div>
+        <p class="text-xs text-gray-500 mt-1">Prescriptive Optimisation ROI</p>
+        <div class="mt-2 text-xs font-mono text-cyber-blue">TARGET: $1,199,360</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ ALERT COUNTERS -->
+<section class="max-w-screen-2xl mx-auto px-4 py-6">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+    <!-- Critical Alerts -->
+    <div class="metric-card rounded-xl p-4 border border-cyber-red/30 bg-cyber-red/5">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-mono text-gray-400 uppercase">Critical Alerts</span>
+        <span class="text-cyber-red text-lg">⚠</span>
+      </div>
+      <div id="criticalCount" class="text-4xl font-black text-cyber-red counter-value">0</div>
+      <div class="mt-1 text-xs text-gray-500 font-mono">Threshold breaches</div>
+      <div class="mt-2 h-1 rounded-full bg-dark-border overflow-hidden">
+        <div id="criticalBar" class="h-full bg-cyber-red transition-all duration-700" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Warning Alerts -->
+    <div class="metric-card rounded-xl p-4 border border-cyber-yellow/30 bg-cyber-yellow/5">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-mono text-gray-400 uppercase">Warnings</span>
+        <span class="text-cyber-yellow text-lg">▲</span>
+      </div>
+      <div id="warningCount" class="text-4xl font-black text-cyber-yellow counter-value">0</div>
+      <div class="mt-1 text-xs text-gray-500 font-mono">Advisory flags</div>
+      <div class="mt-2 h-1 rounded-full bg-dark-border overflow-hidden">
+        <div id="warningBar" class="h-full bg-cyber-yellow transition-all duration-700" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Total Scans -->
+    <div class="metric-card rounded-xl p-4 border border-cyber-blue/30 bg-cyber-blue/5">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-mono text-gray-400 uppercase">Total Scans</span>
+        <span class="text-cyber-blue text-lg">◎</span>
+      </div>
+      <div id="totalScans" class="text-4xl font-black text-cyber-blue counter-value">0</div>
+      <div class="mt-1 text-xs text-gray-500 font-mono">ReAct cycles run</div>
+      <div class="mt-2 h-1 rounded-full bg-dark-border overflow-hidden">
+        <div id="scansBar" class="h-full bg-cyber-blue transition-all duration-700 animate-pulse-bar" style="width:60%"></div>
+      </div>
+    </div>
+
+    <!-- Active Asset -->
+    <div class="metric-card rounded-xl p-4 border border-cyber-purple/30 bg-cyber-purple/5">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-mono text-gray-400 uppercase">Active Asset</span>
+        <span class="text-cyber-purple text-lg">⊛</span>
+      </div>
+      <div id="activeAsset" class="text-xl font-black text-cyber-purple leading-tight mt-1">—</div>
+      <div class="mt-1 text-xs text-gray-500 font-mono" id="lastAction">Awaiting agent…</div>
+      <div class="mt-2 h-1 rounded-full bg-dark-border overflow-hidden">
+        <div class="h-full bg-cyber-purple animate-pulse-bar" style="width:40%"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ CHARTS ROW -->
+<section class="max-w-screen-2xl mx-auto px-4 pb-6">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+    <!-- Vibration Chart -->
+    <div class="chart-card rounded-2xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-bold text-white text-sm">Vibration Frequency</h3>
+          <p class="text-xs text-gray-500 font-mono">Hz · Time Series · Multi-asset</p>
+        </div>
+        <div class="flex gap-2">
+          <span class="threshold-pill bg-yellow-500/15 text-yellow-400 text-xs font-mono px-2 py-0.5 rounded">WARN ≥4.5 Hz</span>
+          <span class="threshold-pill bg-red-500/15 text-red-400 text-xs font-mono px-2 py-0.5 rounded">CRIT ≥6.0 Hz</span>
+        </div>
+      </div>
+      <div class="relative h-56">
+        <canvas id="vibrationChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Structural Health Chart -->
+    <div class="chart-card rounded-2xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-bold text-white text-sm">Structural Health Index</h3>
+          <p class="text-xs text-gray-500 font-mono">% · Time Series · Multi-asset</p>
+        </div>
+        <div class="flex gap-2">
+          <span class="threshold-pill bg-yellow-500/15 text-yellow-400 text-xs font-mono px-2 py-0.5 rounded">WARN ≤72%</span>
+          <span class="threshold-pill bg-red-500/15 text-red-400 text-xs font-mono px-2 py-0.5 rounded">CRIT ≤55%</span>
+        </div>
+      </div>
+      <div class="relative h-56">
+        <canvas id="structuralChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ LIVE ASSET GAUGES -->
+<section class="max-w-screen-2xl mx-auto px-4 pb-6">
+  <h3 class="text-xs font-mono text-gray-400 uppercase tracking-widest mb-3">Live Asset Gauges</h3>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="assetGauges">
+    <!-- Injected by JS -->
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ WORKSPACE + LOGS ROW -->
+<section class="max-w-screen-2xl mx-auto px-4 pb-6">
+  <div class="grid grid-cols-1 xl:grid-cols-5 gap-5">
+
+    <!-- ── watsonx Agent Workspace Terminal ─────────────────────────── -->
+    <div class="xl:col-span-3 terminal-card rounded-2xl flex flex-col" style="min-height:480px">
+      <div class="terminal-header flex items-center justify-between px-4 py-3 border-b border-dark-border">
+        <div class="flex items-center gap-3">
+          <div class="flex gap-1.5">
+            <span class="w-3 h-3 rounded-full bg-red-500 opacity-80"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-500 opacity-80"></span>
+            <span class="w-3 h-3 rounded-full bg-green-500 opacity-80"></span>
+          </div>
+          <span class="text-xs font-mono text-cyber-blue tracking-widest">
+            WATSONX AGENT WORKSPACE — ReAct Reasoning Loop
+          </span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div id="terminalBlinker" class="w-2 h-2 rounded-full bg-cyber-green blink-cursor"></div>
+          <button onclick="clearTerminal()" class="text-xs text-gray-500 hover:text-gray-300 font-mono">CLR</button>
+          <button onclick="pauseTerminal()" class="text-xs text-gray-500 hover:text-gray-300 font-mono" id="pauseBtn">PAUSE</button>
+        </div>
+      </div>
+      <div id="terminalOutput"
+           class="flex-1 overflow-y-auto px-4 py-3 font-mono text-xs leading-relaxed terminal-text space-y-0.5"
+           style="max-height:420px">
+        <div class="text-gray-600">── ChronosAI Terminal Initialised ──────────────────────────────</div>
+        <div class="text-gray-600">── Awaiting agent start signal…</div>
+      </div>
+    </div>
+
+    <!-- ── Dataset / Shift Logs Panel ──────────────────────────────── -->
+    <div class="xl:col-span-2 rounded-2xl bg-dark-card border border-dark-border flex flex-col" style="min-height:480px">
+      <div class="px-4 py-3 border-b border-dark-border flex items-center justify-between">
+        <span class="text-xs font-mono text-gray-300 uppercase tracking-widest">Unified Dataset Stream</span>
+        <span class="text-xs font-mono text-gray-500">7 entries</span>
+      </div>
+      <div id="datasetPanel" class="flex-1 overflow-y-auto p-3 space-y-2" style="max-height:430px">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ ROI DETAIL -->
+<section class="max-w-screen-2xl mx-auto px-4 pb-6">
+  <div class="rounded-2xl bg-dark-card border border-cyber-green/20 p-6">
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-6 justify-between">
+      <div class="flex-1">
+        <p class="text-xs font-mono text-cyber-green uppercase tracking-widest mb-1">Prescriptive Optimisation Model</p>
+        <h3 class="text-xl font-black text-white">Highest-ROI Vendor Supply Fix</h3>
+        <p class="text-sm text-gray-400 mt-1 max-w-xl">
+          The ReAct agent continuously runs a prescriptive optimisation model over real-time telemetry.
+          When critical thresholds are breached, it computes the maximum enterprise savings achievable
+          through expedited vendor intervention — targeting <strong class="text-cyber-green">$1,199,360</strong> in avoidable downtime costs.
+        </p>
+      </div>
+      <div class="grid grid-cols-2 gap-3 min-w-[260px]">
+        <div class="roi-detail-cell rounded-xl p-3 text-center">
+          <div class="text-xs text-gray-500 font-mono mb-1">Loss / Day</div>
+          <div class="text-lg font-bold text-cyber-red">$420,000</div>
+        </div>
+        <div class="roi-detail-cell rounded-xl p-3 text-center">
+          <div class="text-xs text-gray-500 font-mono mb-1">Lead Time</div>
+          <div class="text-lg font-bold text-cyber-yellow">14 → 2 days</div>
+        </div>
+        <div class="roi-detail-cell rounded-xl p-3 text-center">
+          <div class="text-xs text-gray-500 font-mono mb-1">Confidence</div>
+          <div id="roiConfidence" class="text-lg font-bold text-cyber-blue">—</div>
+        </div>
+        <div class="roi-detail-cell rounded-xl p-3 text-center">
+          <div class="text-xs text-gray-500 font-mono mb-1">Max Savings</div>
+          <div class="text-lg font-bold text-cyber-green">$1,199,360</div>
+        </div>
+      </div>
+    </div>
+    <!-- ROI progress bar -->
+    <div class="mt-4">
+      <div class="flex justify-between text-xs font-mono text-gray-500 mb-1">
+        <span>ROI Realisation Progress</span>
+        <span id="roiPct">0%</span>
+      </div>
+      <div class="h-2 rounded-full bg-dark-border overflow-hidden">
+        <div id="roiProgressBar" class="h-full rounded-full bg-gradient-to-r from-cyber-blue to-cyber-green transition-all duration-1000" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ AGENT CONFIG PANEL -->
+<section class="max-w-screen-2xl mx-auto px-4 pb-10">
+  <div class="rounded-2xl bg-dark-card border border-dark-border p-5">
+    <p class="text-xs font-mono text-gray-400 uppercase tracking-widest mb-3">Agent Configuration (AGENT_INSTRUCTIONS)</p>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="config-cell rounded-lg p-3">
+        <div class="text-xs text-gray-500 font-mono">Scan Interval</div>
+        <div class="text-sm font-bold text-white mt-0.5">8 seconds</div>
+      </div>
+      <div class="config-cell rounded-lg p-3">
+        <div class="text-xs text-gray-500 font-mono">ReAct Max Iter</div>
+        <div class="text-sm font-bold text-white mt-0.5">6 iterations</div>
+      </div>
+      <div class="config-cell rounded-lg p-3">
+        <div class="text-xs text-gray-500 font-mono">Vib Critical</div>
+        <div class="text-sm font-bold text-cyber-red mt-0.5">≥ 6.0 Hz</div>
+      </div>
+      <div class="config-cell rounded-lg p-3">
+        <div class="text-xs text-gray-500 font-mono">SH Critical</div>
+        <div class="text-sm font-bold text-cyber-red mt-0.5">≤ 55%</div>
+      </div>
+      <div class="config-cell rounded-lg p-3">
+        <div class="text-xs text-gray-500 font-mono">Model</div>
+        <div class="text-sm font-bold text-cyber-blue mt-0.5 truncate" id="cfgModel">granite-3-3-8b</div>
+      </div>
+      <div class="config-cell rounded-lg p-3">
+        <div class="text-xs text-gray-500 font-mono">Temperature</div>
+        <div class="text-sm font-bold text-white mt-0.5">0.2</div>
+      </div>
+      <div class="config-cell rounded-lg p-3">
+        <div class="text-xs text-gray-500 font-mono">Top-P</div>
+        <div class="text-sm font-bold text-white mt-0.5">0.85</div>
+      </div>
+      <div class="config-cell rounded-lg p-3">
+        <div class="text-xs text-gray-500 font-mono">Max Tokens</div>
+        <div class="text-sm font-bold text-white mt-0.5">512</div>
+      </div>
+    </div>
+    <p class="text-xs text-gray-600 font-mono mt-3">
+      Edit <code class="text-cyber-blue">AGENT_INSTRUCTIONS</code> in <code class="text-cyber-blue">app.py</code> to customise tone, thresholds, safety protocols, and model parameters.
+    </p>
+  </div>
+</section>
+
+</div><!-- /#dashboardPanel -->
+
+<!-- ═══════════════════════════════════════════════════════════ CHAT TAB PANEL -->
+<div id="chatPanel" class="hidden max-w-screen-2xl mx-auto px-4 py-6" style="min-height:calc(100vh - 68px)">
+
+  <!-- Chat window wrapper -->
+  <div class="chat-window flex flex-col rounded-2xl border border-dark-border bg-dark-card overflow-hidden"
+       style="height:calc(100vh - 160px); min-height:520px">
+
+    <!-- Chat header -->
+    <div class="chat-header flex items-center justify-between px-5 py-4 border-b border-dark-border">
+      <div class="flex items-center gap-3">
+        <div class="logo-orb w-9 h-9 rounded-full flex items-center justify-center text-base font-black flex-shrink-0">◈</div>
+        <div>
+          <div class="text-sm font-bold text-white">ChronosAI Assistant</div>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyber-green blink-cursor"></span>
+            <span class="text-xs font-mono text-gray-400">granite-3-3-8b-instruct · IBM Watsonx.ai</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="chatSimBadge" class="text-xs font-mono px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">SIMULATION</span>
+        <button onclick="clearChat()" class="text-xs text-gray-500 hover:text-gray-300 font-mono px-2 py-1 rounded border border-dark-border hover:border-gray-600 transition-colors">CLR</button>
+      </div>
+    </div>
+
+    <!-- Message area -->
+    <div id="chatMessages" class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+      <!-- Welcome bubble -->
+      <div class="flex items-start gap-3">
+        <div class="chat-avatar-ai flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black">⚡</div>
+        <div class="chat-bubble-ai rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%]">
+          <p class="text-sm leading-relaxed">
+            Hello, I'm <strong class="text-cyber-blue">ChronosAI</strong> — your autonomous asset reliability assistant powered by <strong class="text-cyber-purple">IBM Granite Guardian</strong>.
+          </p>
+          <p class="text-sm leading-relaxed mt-2">
+            Ask me about vibration telemetry, structural health indices, shift-log risk variables, ROI optimisation, or the ReAct reasoning pipeline.
+          </p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button onclick="sendSuggestion(this)" class="chat-suggestion text-xs">What assets are critical?</button>
+            <button onclick="sendSuggestion(this)" class="chat-suggestion text-xs">Explain the ROI savings</button>
+            <button onclick="sendSuggestion(this)" class="chat-suggestion text-xs">How does the ReAct loop work?</button>
+            <button onclick="sendSuggestion(this)" class="chat-suggestion text-xs">What caused TURBINE-A1 failure?</button>
+          </div>
+          <div class="text-xs text-gray-600 font-mono mt-2">Just now</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typing indicator (hidden by default) -->
+    <div id="chatTyping" class="hidden px-5 pb-2">
+      <div class="flex items-center gap-3">
+        <div class="chat-avatar-ai flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black">⚡</div>
+        <div class="chat-bubble-ai rounded-2xl rounded-tl-sm px-4 py-3">
+          <div class="typing-dots flex gap-1 items-center h-4">
+            <span class="typing-dot w-2 h-2 rounded-full bg-cyber-blue"></span>
+            <span class="typing-dot w-2 h-2 rounded-full bg-cyber-blue" style="animation-delay:.2s"></span>
+            <span class="typing-dot w-2 h-2 rounded-full bg-cyber-blue" style="animation-delay:.4s"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="chat-input-area px-4 py-4 border-t border-dark-border">
+      <div class="flex items-end gap-3">
+        <div class="flex-1 relative">
+          <textarea
+            id="chatInput"
+            rows="1"
+            placeholder="Ask ChronosAI about asset health, telemetry, or risk analysis…"
+            class="chat-textarea w-full rounded-xl px-4 py-3 pr-12 text-sm resize-none outline-none font-sans"
+            style="max-height:120px; overflow-y:auto"
+            onkeydown="chatInputKeyDown(event)"
+            oninput="autoResizeTextarea(this)"
+          ></textarea>
+        </div>
+        <button id="chatSendBtn" onclick="sendChatMessage()"
+          class="chat-send-btn flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-lg transition-all">
+          ➤
+        </button>
+      </div>
+      <div class="text-xs text-gray-700 font-mono mt-2 text-center">
+        Enter to send · Shift+Enter for new line · Powered by granite-3-3-8b-instruct
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ FOOTER -->
+<footer class="border-t border-dark-border mt-2">
+  <div class="max-w-screen-2xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <p class="text-xs text-gray-600 font-mono">ChronosAI · Autonomous Asset Reliability Agent · IBM Watsonx.ai + Granite</p>
+    <p class="text-xs text-gray-600 font-mono">ReAct · NLP Risk Extraction · Prescriptive ROI · Real-Time SSE</p>
+  </div>
+</footer>
+
+<script src="/static/js/script.js"></script>
+</body>
+</html>
