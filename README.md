@@ -28,53 +28,63 @@ chronos-ai/
 ├── .env.example        # Environment variable layout credential template
 └── templates/
     └── index.html      # Responsive frontend interactive control room dashboard
+```
 
+## 🚀 Quick Start
 
-🚀 Quick Start
-Step 1 — Clone & Enter Directory
-Bash
+## Step 1 — Clone & Enter Directory
+```text
 git clone <your-repository-url>
 cd chronos-ai
+```
+## Step 2 — Create Virtual Environment
+```text
+# On Windows (PowerShell):
 
-
-Step 2 — Create Virtual Environment
-On Windows (PowerShell):
-PowerShell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 
-On macOS / Linux:
-Bash
+# On macOS / Linux:
+
 python3 -m venv venv
 source venv/bin/activate
-
-
-Step 3 — Install Dependencies
-Bash
+```
+## Step 3 — Install Dependencies
+```text
 pip install -r requirements.txt
+```
+## Step 4 — Configure Environment Variables
 
-
-Step 4 — Configure Environment Variables
 Copy the example file and populate it with your private cloud keys:
-Windows: copy .env.example .env
-macOS/Linux: cp .env.example .env
+```text
+# Windows:
+copy .env.example .env
 
+#macOS/Linux:
+cp .env.example .env
+```
 Edit your local .env file structure:
-Code snippet
+```text
 IBM_API_KEY=your_ibm_cloud_api_key_here
 WATSONX_PROJECT_ID=your_watsonx_project_id_here
-WATSONX_URL=[https://api.au-syd.dataplatform.cloud.ibm.com](https://api.au-syd.dataplatform.cloud.ibm.com)
+WATSONX_URL=https://au-syd.ml.cloud.ibm.com
 CHAT_MODEL_ID=ibm/granite-3-3-8b-instruct
+```
 
-Step 5 — Run the Application
-Bash
+## Step 5 — Run the Application
+```text
 python app.py
+```
 Open your web browser and navigate to: http://127.0.0.1:5000
 
-🔑 Getting IBM Cloud Credentials
-IBM Cloud API Key: Go to IBM Cloud → Manage → IAM → API Keys. Click Create an API Key.
+## 🔑 Getting IBM Cloud Credentials
 
-Watsonx Project ID: Open watsonx.ai → Manage → Projects. Select your sandbox project workspace and copy the unique Project ID string from the settings panel.
+IBM Cloud API Key: 
 
-### ✅ You are officially finished!
-Once Step 3 and Step 4 are complete, your GitHub link is ready to be pasted into **Slide 12** of your PPT and sent directly via the teacher's final evaluation Google Form link! You've done an incredible job putting this repo together.
+1.Go to IBM Cloud → Manage → IAM → API Keys. 
+
+2.Click Create an API Key.
+
+Watsonx Project ID: 
+
+Open watsonx.ai → Manage → Projects. Select your sandbox project workspace and copy the unique Project ID string from the settings panel.
