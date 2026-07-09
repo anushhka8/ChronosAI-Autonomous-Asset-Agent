@@ -5,7 +5,6 @@
 #  Version : 1.0.0
 # =============================================================================
 
-# ── Standard library ─────────────────────────────────────────────────────────
 import os
 import time
 import json
@@ -95,13 +94,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 log = logging.getLogger("ChronosAI")
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "chronos-dev-secret")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "chronos-dev-secret")
 CORS(app)
 
-# ── Watsonx credentials ───────────────────────────────────────────────────────
-IBM_API_KEY        = os.getenv("IBM_API_KEY", "")
-WATSONX_PROJECT_ID = os.getenv("WATSONX_PROJECT_ID", "")
-WATSONX_URL        = os.getenv("WATSONX_URL", "https://au-syd.ml.cloud.ibm.com")
+# ── Watsonx credentials (Securely linked to environment variables) ────────────
+IBM_API_KEY        = os.environ.get("IBM_API_KEY", "")
+WATSONX_PROJECT_ID = os.environ.get("WATSONX_PROJECT_ID", "")
+WATSONX_URL        = os.environ.get("WATSONX_URL", "https://au-syd.ml.cloud.ibm.com")
 
 _watsonx_model: "ModelInference | None" = None
 
@@ -740,10 +739,13 @@ def _simulate_chat_reply(user_msg: str) -> str:
 
 
 # =============================================================================
-#  ENTRY POINT
+#  INITIALIZATION & EXECUTION
 # =============================================================================
+
+# Kick off background ReAct loop automatically so it works under both local servers and Gunicorn/Render deployments
+start_agent()
+
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))
     log.info("Starting ChronosAI on port %d …", port)
-    start_agent()   # kick off background ReAct loop immediately
     app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
