@@ -237,13 +237,16 @@ def stop_agent():
     _agent_running = False
 
 # =============================================================================
-#  FLASK ROUTES (With Deep Case-Insensitive Recursive Search Fixes)
+#  FLASK ROUTES (Universal Path Interceptors — Bulletproof Fix)
 # =============================================================================
 @app.route("/")
 def index():
     return render_template("index.html")
 
 @app.route('/script.js')
+@app.route('/static/script.js')
+@app.route('/static/js/script.js')
+@app.route('/js/script.js')
 def serve_js():
     for root, _, files in os.walk(app.root_path):
         for f in files:
@@ -252,6 +255,12 @@ def serve_js():
     return "Script not found", 404
 
 @app.route('/style.css')
+@app.route('/styles.css')
+@app.route('/static/style.css')
+@app.route('/static/styles.css')
+@app.route('/static/css/style.css')
+@app.route('/static/css/styles.css')
+@app.route('/css/style.css')
 def serve_css():
     for root, _, files in os.walk(app.root_path):
         for f in files:
