@@ -34,8 +34,9 @@ chronos-ai/
 
 ## Step 1 — Clone & Enter Directory
 ```text
-git clone <your-repository-url>
-cd chronos-ai
+
+git clone [https://github.com/anushhka8/ChronosAI-Autonomous-Asset-Agent.git]
+cd ChronosAI-Autonomous-Asset-Agent
 ```
 ## Step 2 — Create Virtual Environment
 ```text
