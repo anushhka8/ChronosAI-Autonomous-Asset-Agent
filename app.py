@@ -181,7 +181,7 @@ def tool_watsonx_analyze(shift_log: str, telemetry_summary: str) -> str:
             return str(model.generate_text(prompt=prompt)).strip()
         except Exception:
             pass
-    return f"[OBSERVATION] Telemetry and log analysis complete. {telemetry_summary}. [RISK ASSESSMENT] Mechanical degradation fatigue detected. [ACTION] Activate emergency supply chain protocol immediately. [ROI IMPACT] Mitigates unplanned breakdown loss, achieving target $1,199,360 enterprise optimizations."
+    return f"[OBSERVATION] Telemetry and log analysis complete. [RISK ASSESSMENT] Mechanical degradation fatigue. [ACTION] Activate emergency supply protocol. [ROI IMPACT] Mitigates downtime loss."
 
 def _emit(message: str, step_type: str = "THINK"):
     ts  = datetime.datetime.utcnow().strftime("%H:%M:%S")
@@ -260,7 +260,7 @@ def stop_agent():
     _agent_running = False
 
 # =============================================================================
-#  FLASK ROUTES (Programmatic Core Interceptors — Bypasses Missing HDD Files)
+#  FLASK ROUTES (Universal Path Interceptors — Fixed JS else if syntax)
 # =============================================================================
 @app.route("/")
 def index():
@@ -271,27 +271,20 @@ def index():
 @app.route('/static/js/script.js')
 @app.route('/js/script.js')
 def serve_js():
-    # If the file exists on your disk, load it automatically
     for root, _, files in os.walk(app.root_path):
         for f in files:
             if f.lower() == 'script.js':
                 return send_file(os.path.join(root, f), mimetype='application/javascript')
                 
-    # FOOLPROOF MEMORY FALLBACK: If missing from your repository, serve the complete client engine directly
     fallback_javascript = """
     window.addEventListener('DOMContentLoaded', () => {
-        console.log("ChronosAI Programmatic Client Engine Loaded Fully.");
+        console.log("ChronosAI Programmatic Engine Active.");
         
-        // Universal Client Tab Controller
         window.switchTab = function(tabName) {
             const mode = tabName.toUpperCase();
-            console.log("Navigating to module:", mode);
-            
-            // Search all semantic layout tags to swap tabs seamlessly
             document.querySelectorAll('section, main, .tab-content, div').forEach(el => {
                 const id = el.id ? el.id.toLowerCase() : '';
                 const cls = el.className ? el.className.toLowerCase() : '';
-                
                 if (mode === 'CHAT') {
                     if (id.includes('chat') || cls.includes('chat')) el.style.display = 'block';
                     if (id.includes('dash') || cls.includes('dash') || id.includes('centre') || cls.includes('centre')) el.style.display = 'none';
@@ -302,27 +295,21 @@ def serve_js():
             });
         };
 
-        // Universal Backend State Trigger Link
         window.agentControl = function(action) {
-            console.log("Sending background system signal:", action);
             fetch('/api/agent/' + action, { method: 'POST' })
             .then(res => res.json())
             .then(data => { syncTelemetryMatrix(); })
-            .catch(err => console.error("Signal transit fault:", err));
+            .catch(err => console.error(err));
         };
 
-        // Automated Core UI Sync Processor
         function syncTelemetryMatrix() {
             fetch('/api/status')
             .then(res => res.json())
             .then(data => {
                 document.querySelectorAll('*').forEach(el => {
                     if (el.children.length === 0) {
-                        let txt = el.innerText || '';
                         let id = el.id ? el.id.toLowerCase() : '';
                         let cls = el.className ? el.className.toLowerCase() : '';
-                        
-                        // Map state fields securely into card inner HTML
                         if (id.includes('scan') || id.includes('cycle') || cls.includes('scan')) el.innerText = data.total_scans;
                         if (id.includes('crit') || cls.includes('alert-count')) el.innerText = data.critical_alerts;
                         if (id.includes('warn') || cls.includes('warn-count')) el.innerText = data.warning_alerts;
@@ -330,35 +317,29 @@ def serve_js():
                         if (id.includes('asset') || cls.includes('active-name')) el.innerText = data.current_asset || 'Monitoring Idle..';
                     }
                 });
-            }).catch(e => console.error("Telemetry refresh blocked:", e));
+            }).catch(e => console.error(e));
         }
 
-        // Live Pipeline Server-Sent Events Terminal Box Hydrator
         const eventsStream = new EventSource('/api/react/trace/stream');
         eventsStream.onmessage = function(e) {
             const payload = JSON.parse(e.data);
             const panel = document.querySelector('.terminal-box') || document.getElementById('react-trace') || document.querySelector('[id*="workspace"]') || document.querySelector('[id*="terminal"]');
-            
             if (panel) {
                 const row = document.createElement('div');
                 row.style.padding = '4px 8px';
                 row.style.fontFamily = 'monospace';
                 row.style.fontSize = '13px';
                 row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-                
-                // Colorize logs based on ReAct severity mapping
                 if (payload.type === 'START') row.style.color = '#00ffcc';
-                elif (payload.type === 'SAFETY') row.style.color = '#ff3366';
-                elif (payload.type === 'WATSONX') row.style.color = '#ffcc00';
+                else if (payload.type === 'SAFETY') row.style.color = '#ff3366';
+                else if (payload.type === 'WATSONX') row.style.color = '#ffcc00';
                 else row.style.color = '#ffffff';
-                
                 row.innerHTML = `[${payload.ts}] <strong>${payload.type}:</strong> ${payload.msg}`;
                 panel.appendChild(row);
                 panel.scrollTop = panel.scrollHeight;
             }
         };
 
-        // Automated execution frames
         setInterval(syncTelemetryMatrix, 2500);
         syncTelemetryMatrix();
     });
@@ -418,9 +399,8 @@ def chat():
         try:
             return jsonify({"reply": str(model.generate_text(prompt=f"Engineer: {msg}\nChronosAI:")).strip(), "model": CHAT_MODEL_ID, "simulated": False})
         except Exception: pass
-    return jsonify({"reply": "ChronosAI Core online. System array elements operating within nominal parameters. Standing by for query.", "model": CHAT_MODEL_ID, "simulated": True})
+    return jsonify({"reply": "ChronosAI Core online. Standing by for local or cloud operational queries.", "model": CHAT_MODEL_ID, "simulated": True})
 
-# Initialize background array scanners
 start_agent()
 
 if __name__ == "__main__":
